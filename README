@@ -39,3 +39,11 @@ This will return with the location information added to the request as a header.
 ```
 
 This request header can then be logged or used as part of the application logic.
+
+## How it works:
+
+This is built on the Wick application framework. This allows for modular solutions to be built and reused.
+
+The `proxy.wick` and the `middleware.wick` files contain all the configuration for the header enrichment. More enrichment actions can easily be added to the `middleware.wick` file.
+
+For documentation on Wick, head to https://candle.dev/docs
