@@ -47,3 +47,16 @@ This is built on the Wick application framework. This allows for modular solutio
 The `proxy.wick` and the `middleware.wick` files contain all the configuration for the header enrichment. More enrichment actions can easily be added to the `middleware.wick` file.
 
 For documentation on Wick, head to https://candle.dev/docs
+
+## Complete reusability
+
+The pangea functionality is completely separated from the HTTP flow. To show it, you can just run the pangea api directly from the CLI.
+
+`curl -sSL sh.wick.run | bash -s -- nightly` to install Wick.
+`export PANGEA_TOKEN="<MYTOKEN>"`
+`wick invoke registry.candle.dev/pangea/pangea:0.2.0 ip_geolocate  -- --ip="91.101.44.98"`
+returns:
+
+```
+{"payload":{"value":{"city":"glostrup","country":"Kingdom Of Denmark","country_code":"dk","latitude":55.66999816894531,"longitude":12.399999618530273,"postal_code":"2600"}},"port":"geolocation"}`
+```

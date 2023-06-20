@@ -1,7 +1,7 @@
 kind: wick/component@v1
 name: pangea
 metadata:
-  version: 0.1.0
+  version: 0.2.0
   description: pangea component
   licenses:
   - Apache-2.0
@@ -29,4 +29,9 @@ component:
     flow:
     - <input>.ip -> pangea_engine::geolocate[GEO].ip
     - GEO.location.country_code -> <output>.country_code
+    - GEO.status -> drop
+  - name: ip_geolocate
+    flow:
+    - <input>.ip -> pangea_engine::geolocate[GEO].ip
+    - GEO.location -> <output>.geolocation
     - GEO.status -> drop
