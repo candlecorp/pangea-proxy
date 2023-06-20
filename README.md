@@ -1,4 +1,4 @@
-#Pangea Proxy
+# Pangea Proxy
 This is a project to show how to use Wick to create a HTTP proxy that will use the Pangea Cloud api to enrich the request with the user's location and then forward the request to the appropriate server.
 
 This will allow any existing service to be location aware without having to change the source code of service itself. The location information is added to the request as a header and can be logged for research purposes.
