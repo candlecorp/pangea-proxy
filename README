@@ -1,0 +1,41 @@
+#Pangea Proxy
+This is a project to show how to use Wick to create a HTTP proxy that will use the Pangea Cloud api to enrich the request with the user's location and then forward the request to the appropriate server.
+
+This will allow any existing service to be location aware without having to change the source code of service itself. The location information is added to the request as a header and can be logged for research purposes.
+
+## How to use
+
+Clone this repo
+
+get a token from the Pangea Cloud API
+
+Update the `docker-compose.yml` file with the token `- PANGEA_TOKEN=<YOURTOKEN>`
+
+`docker-compose up -d`
+
+`curl -X POST -v 'localhost:8080/post?show_env=1'  -H "x-forwarded-for: 11.108.2.98"`
+
+This will return with the location information added to the request as a header.
+
+```
+{
+  "args": {
+    "show_env": "1"
+  },
+  "data": "",
+  "files": {},
+  "form": {},
+  "headers": {
+    "Accept": "*/*",
+    "Host": "httpbin",
+    "User-Agent": "curl/7.88.1",
+    "X-Forwarded-For": "11.108.2.98, 172.23.0.1",
+    "X-Pangea-Country-Code": "us"
+  },
+  "json": null,
+  "origin": "11.108.2.98, 172.23.0.1",
+  "url": "http://httpbin/post?show_env=1"
+}
+```
+
+This request header can then be logged or used as part of the application logic.

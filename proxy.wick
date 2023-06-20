@@ -1,0 +1,36 @@
+kind: wick/app@v1
+name: proxy
+metadata:
+  version: 0.0.1
+  description: HTTP Proxy for middleware
+  licenses:
+    - Apache-2.0
+package:
+  registry:
+    host: registry.candle.dev
+    namespace: pangea
+resources:
+  - name: httpserver
+    resource:
+      kind: wick/resource/tcpport@v1
+      port: 8080
+      address: 0.0.0.0
+  - name: httpbin
+    resource:
+      kind: wick/resource/url@v1
+      url: http://httpbin:80
+import:
+  - name: middleware
+    component:
+      kind: wick/component/manifest@v1
+      ref: ./middleware.wick
+triggers:
+  - resource: httpserver
+    kind: wick/trigger/http@v1
+    routers:
+      - kind: wick/router/proxy@v1
+        middleware:
+          request:
+            - middleware::enrich_request
+        path: /
+        url: httpbin

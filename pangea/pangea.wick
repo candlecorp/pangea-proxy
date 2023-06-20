@@ -1,0 +1,32 @@
+kind: wick/component@v1
+name: pangea
+metadata:
+  version: 0.1.0
+  description: pangea component
+  licenses:
+  - Apache-2.0
+package:
+  registry:
+    host: registry.candle.dev
+    namespace: pangea
+import:
+  - name: pangea_api
+    component:
+      kind: wick/component/manifest@v1
+      ref: ./pangea_api.wick
+  - name: pangea_engine
+    component:
+      kind: wick/component/manifest@v1
+      ref: ./pangea_engine.wick
+      with:
+        token: $PANGEA_TOKEN
+      provide:
+        pangea_api: pangea_api
+component:
+  kind: wick/component/composite@v1
+  operations:
+  - name: ip_country_code
+    flow:
+    - <input>.ip -> pangea_engine::geolocate[GEO].ip
+    - GEO.location.country_code -> <output>.country_code
+    - GEO.status -> drop

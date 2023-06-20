@@ -1,0 +1,108 @@
+kind: wick/component@v1
+name: middleware
+metadata:
+  version: 0.0.1
+  description: middleware component for pangea
+  licenses:
+  - Apache-2.0
+package:
+  registry:
+    host: registry.candle.dev
+    namespace: pangea
+import:
+  - name: http
+    component:
+      kind: wick/component/types@v1
+      ref: registry.candle.dev/types/http:0.2.0
+  - name: pangea
+    component:
+      kind: wick/component/manifest@v1
+      ref: registry.candle.dev/pangea/pangea:0.1.0
+  - name: object
+    component:
+      kind: wick/component/manifest@v1
+      ref: registry.candle.dev/common/object:0.1.0
+  - name: liquid_json
+    component:
+      kind: wick/component/manifest@v1
+      ref: registry.candle.dev/common/liquid-json:0.1.0
+  - name: client_ip
+    component:
+      kind: wick/component/manifest@v1
+      ref: registry.candle.dev/candle/http_client_ip:0.1.0
+component:
+  kind: wick/component/composite@v1
+  operations:
+  - name: enrich_request
+    uses: 
+      - name: GET_CLIENT_IP
+        operation: client_ip::get_ip
+      - name: IP_COUNTRY_CODE
+        operation: pangea::ip_country_code
+      - name: INSERT_HEADER
+        operation: object::push
+        with:
+          path: "$.headers"
+      - name: CREATE_HEADER
+        operation: object::new
+        with:
+          key: "country_code"
+      - name: CREATE_HEADER_ARRAY
+        operation: liquid_json::render
+        with:
+          template:
+            'X-Pangea-Country-Code': ["{{ country_code }}"]
+    flow:
+    - <>.request -> GET_CLIENT_IP.request
+    - GET_CLIENT_IP.ip -> IP_COUNTRY_CODE.ip
+    - IP_COUNTRY_CODE.country_code -> CREATE_HEADER.value
+    - CREATE_HEADER.output -> CREATE_HEADER_ARRAY.input
+    - CREATE_HEADER_ARRAY.output -> INSERT_HEADER.value
+    - <>.request -> INSERT_HEADER.input
+    - INSERT_HEADER.output -> <>.request
+tests:
+  - name: update_request
+    cases:
+      - name: no cookie
+        operation: enrich_request
+        inputs:
+          - name: request
+            value:
+              method: Get
+              scheme: Http
+              path: "/"
+              uri: "http://localhost:8080/"
+              version: Http11
+              authority: "localhost:8080"
+              remote_addr: "99.108.2.98"
+              query_parameters: {}
+              headers:
+                host:
+                  - "localhost:8080"
+                user-agent:
+                  - "curl/7.64.1"
+                accept:
+                  - "*/*"
+        outputs:
+          - name: request
+            value:
+              method: Get
+              scheme: Http
+              path: "/"
+              uri: "http://localhost:8080/"
+              version: Http11
+              authority: "localhost:8080"
+              remote_addr: "99.108.2.98"
+              query_parameters: {}
+              headers:
+                host:
+                  - "localhost:8080"
+                user-agent:
+                  - "curl/7.64.1"
+                accept:
+                  - "*/*"
+                x-pangea-country-code:
+                  - "us"
+          - name: request
+            flags:
+              done: true

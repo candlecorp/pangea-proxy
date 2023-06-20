@@ -1,0 +1,57 @@
+---
+name: "pangea_engine"
+kind: wick/component@v1
+metadata:
+  version: "0.0.1"
+import:
+  - name: http
+    component:
+      kind: wick/component/types@v1
+      ref: registry.candle.dev/types/http:0.2.0
+types:
+  - name: GeolocateData
+    kind: wick/type/struct@v1
+    fields:
+      - name: country
+        type: string
+      - name: city
+        type: string
+      - name: latitude
+        type: f32
+      - name: longitude
+        type: f32
+      - name: postal_code
+        type: string
+      - name: country_code
+        type: string
+requires:
+  - name: pangea_api
+    interface:
+      operations:
+        - name: ip_geolocate
+          inputs:
+            - name: ip
+              type: string
+            - name: token
+              type: string
+          outputs:
+            - name: response
+              type: http::HttpResponse
+            - name: body
+              type: object
+component:
+  kind: wick/component/wasmrs@v1
+  ref: build/pangea.signed.wasm
+  with:
+    - name: token
+      type: string
+  operations:
+    - name: geolocate
+      inputs:
+        - name: ip
+          type: string
+      outputs:
+        - name: status
+          type: string
+        - name: location
+          type: GeolocateData
