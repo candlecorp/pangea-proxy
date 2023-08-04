@@ -1,7 +1,7 @@
 kind: wick/component@v1
 name: pangea
 metadata:
-  version: 0.2.0
+  version: 0.3.0
   description: pangea component
   licenses:
   - Apache-2.0
@@ -14,24 +14,30 @@ import:
     component:
       kind: wick/component/manifest@v1
       ref: ./pangea_api.wick
+      with:
+        token: '{{ ctx.root_config.token }}'
+        url: '{{ ctx.root_config.url }}'
   - name: pangea_engine
     component:
       kind: wick/component/manifest@v1
       ref: ./pangea_engine.wick
-      with:
-        token: $PANGEA_TOKEN
       provide:
         pangea_api: pangea_api
 component:
   kind: wick/component/composite@v1
+  with:
+    - name: token
+      type: string
+    - name: url
+      type: string
   operations:
   - name: ip_country_code
     flow:
     - <input>.ip -> pangea_engine::geolocate[GEO].ip
     - GEO.location.country_code -> <output>.country_code
-    - GEO.status -> drop
+    - GEO.status -> <output>.status
   - name: ip_geolocate
     flow:
     - <input>.ip -> pangea_engine::geolocate[GEO].ip
     - GEO.location -> <output>.geolocation
-    - GEO.status -> drop
+    - GEO.status -> <output>.status

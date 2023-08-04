@@ -1,17 +1,22 @@
 kind: wick/component@v1
 name: pangea_api
 metadata:
-  version: 0.0.1
-  description: New HTTP Client wick component
+  version: 0.1.0
+  description: HTTP Client Component for Pangea Cloud API
   licenses:
     - Apache-2.0
 resources:
   - name: HTTP_URL
     resource:
       kind: wick/resource/url@v1
-      url: https://ip-intel.aws.us.pangea.cloud
+      url: '{{ ctx.root_config.url }}'
 component:
   kind: wick/component/http@v1
+  with:
+    - name: token
+      type: string
+    - name: url
+      type: string
   resource: HTTP_URL
   codec: Json
   operations:
@@ -19,13 +24,22 @@ component:
       inputs:
         - name: ip
           type: string
-        - name: token
-          type: string
       method: Post
       codec: Json
-      path: /v1/geolocate
+      path: v1/geolocate
       headers:
-        "Authorization": ["Bearer {{ token }}"]
+        "Authorization": ["Bearer {{ ctx.root_config.token }}"]
         "Content-Type": ["application/json"]
       body:
         ip: "{{ ip }}"
+tests:
+  - name: test_ip_geolocate
+    with: 
+      token: "{{ ctx.env.PANGEA_TOKEN }}"
+      url: "{{ ctx.env.PANGEA_URL }}"
+    cases:
+      - name: test_invalid_ip
+        operation: ip_geolocate
+        inputs:
+          - name: ip
+            value: "91.105.2.91"

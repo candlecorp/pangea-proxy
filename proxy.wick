@@ -13,7 +13,7 @@ resources:
   - name: httpserver
     resource:
       kind: wick/resource/tcpport@v1
-      port: 8080
+      port: "8080"
       address: 0.0.0.0
   - name: httpbin
     resource:
@@ -24,6 +24,9 @@ import:
     component:
       kind: wick/component/manifest@v1
       ref: ./middleware.wick
+      with:
+        token: '{{ ctx.env.PANGEA_TOKEN }}'
+        url: '{{ ctx.env.PANGEA_URL }}'
 triggers:
   - resource: httpserver
     kind: wick/trigger/http@v1

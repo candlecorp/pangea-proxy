@@ -32,8 +32,6 @@ requires:
           inputs:
             - name: ip
               type: string
-            - name: token
-              type: string
           outputs:
             - name: response
               type: http::HttpResponse
@@ -42,9 +40,6 @@ requires:
 component:
   kind: wick/component/wasmrs@v1
   ref: build/pangea.signed.wasm
-  with:
-    - name: token
-      type: string
   operations:
     - name: geolocate
       inputs:

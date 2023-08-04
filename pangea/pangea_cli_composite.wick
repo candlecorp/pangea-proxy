@@ -1,0 +1,87 @@
+kind: wick/component@v1
+name: pangea_cli_transformer
+metadata:
+  version: 0.1.0
+  description: cli transformer component for pangea
+  licenses:
+  - Apache-2.0
+import:
+  - name: cli
+    component:
+      kind: wick/component/types@v1
+      ref: registry.candle.dev/types/cli:0.1.0
+  - name: log
+    component:
+      kind: wick/component/manifest@v1
+      ref: registry.candle.dev/common/log:0.2.0
+  - name: pangea
+    component:
+      kind: wick/component/manifest@v1
+      ref: registry.candle.dev/pangea/pangea:0.3.0
+      with:
+        token: '{{ ctx.root_config.token }}'
+        url: '{{ ctx.root_config.url }}'
+component:
+  kind: wick/component/composite@v1
+  with:
+    - name: token
+      type: string
+    - name: url
+      type: string
+  operations:
+  - name: main
+    inputs:
+      - name: args
+        type: 'string[]'
+      - name: interactive
+        type: cli::Interactive
+    outputs:
+      - name: code
+        type: u32
+    uses: 
+      - name: PANGEA
+        operation: pangea::ip_geolocate
+      - name: LOG
+        operation: log::object
+      - name: SWITCH
+        operation: core::switch
+        with:
+          context:
+            - name: status
+              type: bool
+          outputs:
+            - name: code
+              type: u32
+          cases:
+            - case: true
+              do: self::main::send_zero
+          default: self::main::send_one
+    flow:
+    - <>.args.1 -> PANGEA.ip
+    - PANGEA.geolocation -> LOG.input
+    - LOG.output -> SWITCH.match
+    - LOG.output -> SWITCH.status
+    - SWITCH.code -> <>.code
+    operations:
+      - name: send_zero
+        uses:
+          - name: SENDER
+            operation: core::sender
+            with:
+              output: 0
+        outputs:
+          - name: code
+            type: u32
+        flow:
+        - SENDER.output -> <>.code
+      - name: send_one
+        uses:
+          - name: SENDER
+            operation: core::sender
+            with:
+              output: 1
+        outputs:
+          - name: code
+            type: u32
+        flow:
+        - SENDER.output -> <>.code

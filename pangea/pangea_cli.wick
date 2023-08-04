@@ -1,0 +1,22 @@
+name: geolocate
+kind: wick/app@v1
+metadata:
+  version: 0.1.0
+  description: CLI for Pangea IP Lookup API
+  licenses:
+  - Apache-2.0
+package:
+  registry:
+    host: registry.candle.dev
+    namespace: pangea
+import:
+  - name: CLI
+    component:
+      kind: wick/component/manifest@v1
+      ref: ./pangea_cli_composite.wick
+      with:
+        token: '{{ ctx.env.PANGEA_TOKEN }}'
+        url: '{{ ctx.env.PANGEA_URL }}'
+triggers:
+  - kind: wick/trigger/cli@v1
+    operation: CLI::main
