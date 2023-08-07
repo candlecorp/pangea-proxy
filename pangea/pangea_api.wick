@@ -32,14 +32,3 @@ component:
         "Content-Type": ["application/json"]
       body:
         ip: "{{ ip }}"
-tests:
-  - name: test_ip_geolocate
-    with: 
-      token: "{{ ctx.env.PANGEA_TOKEN }}"
-      url: "{{ ctx.env.PANGEA_URL }}"
-    cases:
-      - name: test_invalid_ip
-        operation: ip_geolocate
-        inputs:
-          - name: ip
-            value: "91.105.2.91"

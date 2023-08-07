@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  httpbin:
+    image: kennethreitz/httpbin
+    ports:
+      - 8081:80
+
+  proxy:
+    image: ghcr.io/candlecorp/wick:nightly
+    ports:
+      - 8080:8080
+    environment:
+      - PANGEA_TOKEN=${PANGEA_TOKEN}
+      - PANGEA_URL=${PANGEA_URL}
+    volumes:
+      - ./proxy.wick:/app/proxy.wick
+      - ./middleware.wick:/app/middleware.wick
+    command:
+      - run
+      - proxy.wick
+      - --trace

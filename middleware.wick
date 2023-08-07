@@ -33,6 +33,10 @@ import:
     component:
       kind: wick/component/manifest@v1
       ref: registry.candle.dev/candle/http_client_ip:0.2.0
+  - name: http_headers
+    component:
+      kind: wick/component/manifest@v1
+      ref: registry.candle.dev/candle/http-headers:0.1.0
 component:
   kind: wick/component/composite@v1
   with:
@@ -53,28 +57,17 @@ component:
         operation: client_ip::get_ip
       - name: IP_COUNTRY_CODE
         operation: pangea::ip_country_code
-      - name: INSERT_HEADER
-        operation: object::push
+      - name: ADD_HEADER
+        operation: http_headers::add
         with:
-          path: "$.headers"
-      - name: CREATE_HEADER
-        operation: object::new
-        with:
-          key: "country_code"
-      - name: CREATE_HEADER_ARRAY
-        operation: liquid_json::render
-        with:
-          template:
-            'x-pangea-country-code': ["{% raw %}{{ country_code }}{% endraw %}"]
+          header: x-pangea-country-code
     flow:
     - <>.request -> GET_CLIENT_IP.request
     - GET_CLIENT_IP.ip -> IP_COUNTRY_CODE.ip
-    - IP_COUNTRY_CODE.country_code -> CREATE_HEADER.value
+    - <>.request -> ADD_HEADER.input
+    - IP_COUNTRY_CODE.country_code -> ADD_HEADER.value
     - IP_COUNTRY_CODE.status -> drop
-    - CREATE_HEADER.output -> CREATE_HEADER_ARRAY.input
-    - CREATE_HEADER_ARRAY.output -> INSERT_HEADER.value
-    - <>.request -> INSERT_HEADER.input
-    - INSERT_HEADER.output -> <>.output
+    - ADD_HEADER.output -> <>.request
 tests:
   - name: update_request
     with:
@@ -102,25 +95,24 @@ tests:
                 accept:
                   - "*/*"
         outputs:
-          - name: output
+          - name: request
             value:
-              method: Get
-              scheme: Http
-              path: "/"
-              uri: "http://localhost:8080/"
-              version: Http11
               authority: "localhost:8080"
-              remote_addr: "91.108.2.98"
-              query_parameters: {}
               headers:
+                accept:
+                  - "*/*"
                 host:
                   - "localhost:8080"
                 user-agent:
                   - "curl/7.64.1"
-                accept:
-                  - "*/*"
                 x-pangea-country-code:
                   - "ru"
-          - name: output
+              method: Get
+              path: "/"
+              remote_addr: "91.108.2.98"
+              scheme: "Http"
+              uri: "http://localhost:8080/"
+              version: "1.1"
+          - name: request
             flags:
               done: true

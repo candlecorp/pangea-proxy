@@ -3,8 +3,6 @@ mod wick {
 }
 use wick::*;
 
-//make a struct for response body
-
 #[async_trait::async_trait(?Send)]
 impl GeolocateOperation for Component {
     type Error = anyhow::Error;
@@ -37,16 +35,16 @@ impl GeolocateOperation for Component {
                     continue;
                 }
 
-                let status = body.get("status");
-                let status = match status {
-                    Some(status) => status.as_str().map(|s| s.to_string()),
-                    _ => None,
-                };
+                // Attempt to retrieve the 'status' field from the API response body.
+                let status = body
+                    .get("status")
+                    .and_then(|s| s.as_str().map(|s| s.to_string()));
 
+                // Handle based on the status received.
                 match &status {
                     Some(status) => println!("status: {}", status),
-                    _ => {
-                        outputs.status.error(format!("IP Not found"));
+                    None => {
+                        outputs.status.error("IP Not found");
                         continue;
                     }
                 };
@@ -54,6 +52,7 @@ impl GeolocateOperation for Component {
                 let status = status.unwrap();
 
                 if status != "Success" {
+                    //send stream of errors to wick
                     outputs
                         .status
                         .error(format!("Pangea api returned status {}", status));
@@ -61,6 +60,7 @@ impl GeolocateOperation for Component {
                 } else {
                     println!("status: {}", status);
 
+                    // Attempt to extract geolocation data from the response.
                     if let Some(result) = body.get("result") {
                         if let Some(data) = result.get("data") {
                             let location: types::GeolocateData =
@@ -68,38 +68,27 @@ impl GeolocateOperation for Component {
                                     anyhow::anyhow!("failed to parse response: {}", e)
                                 })?;
 
+                            //send stream of outputs to wick
                             outputs.location.send(&location);
-
-                            outputs.status.send(&status.to_string());
+                            outputs.status.send(&status);
                         } else {
+                            //send stream of errors to wick
                             outputs.status.error("missing data from Pangea api");
                             continue;
                         }
                     } else {
+                        //send stream of errors to wick
                         outputs.status.error("missing result from Pangea api");
                         continue;
                     }
                 }
             }
         }
+
+        // Let wick know that the response streams are done.
         outputs.status.done();
         outputs.location.done();
+
         Ok(())
     }
 }
-
-// - name: GeolocateData
-// kind: wick/type/struct@v1
-// fields:
-//   - name: country
-//     type: string
-//   - name: city
-//     type: string
-//   - name: latitude
-//     type: f32
-//   - name: longitude
-//     type: f32
-//   - name: postal_code
-//     type: string
-//   - name: country_code
-//     type: string
