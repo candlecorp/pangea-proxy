@@ -24,6 +24,7 @@ impl GeolocateOperation for Component {
                 get_geolocate_response.next().await,
                 get_geolocate_response_body.next().await,
             ) {
+                //Throw error if the response is not valid
                 let response = propagate_if_error!(get_geolocate_response, outputs, continue);
                 let body = propagate_if_error!(get_geolocate_response_body, outputs, continue);
 

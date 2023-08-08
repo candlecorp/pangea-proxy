@@ -1,5 +1,5 @@
 kind: wick/component@v1
-name: pangea
+name: pangea_wasm
 metadata:
   version: 0.1.0
   description: pangea component
@@ -17,6 +17,12 @@ import:
       with:
         token: '{{ ctx.root_config.token }}'
         url: '{{ ctx.root_config.url }}'
+  - name: pangea_engine
+    component:
+      kind: wick/component/manifest@v1
+      ref: ./pangea_engine.wick
+      provide:
+        pangea_api: pangea_api
 component:
   kind: wick/component/composite@v1
   with:
@@ -27,11 +33,11 @@ component:
   operations:
   - name: ip_country_code
     flow:
-    - <input>.ip -> pangea_api::ip_geolocate[GEO].ip
-    - GEO.body.result.data.country_code -> <output>.country_code
-    - GEO.response -> drop
+    - <input>.ip -> pangea_engine::geolocate[GEO].ip
+    - GEO.location.country_code -> <output>.country_code
+    - GEO.status -> <output>.status
   - name: ip_geolocate
     flow:
-    - <input>.ip -> pangea_api::ip_geolocate[GEO].ip
-    - GEO.body.result.data -> <output>.geolocation
-    - GEO.response -> drop
+    - <input>.ip -> pangea_engine::geolocate[GEO].ip
+    - GEO.location -> <output>.geolocation
+    - GEO.status -> <output>.status

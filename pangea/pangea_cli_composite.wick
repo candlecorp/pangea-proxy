@@ -17,7 +17,7 @@ import:
   - name: pangea
     component:
       kind: wick/component/manifest@v1
-      ref: registry.candle.dev/pangea/pangea:0.3.0
+      ref: registry.candle.dev/pangea/pangea:0.1.0
       with:
         token: '{{ ctx.root_config.token }}'
         url: '{{ ctx.root_config.url }}'

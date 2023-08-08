@@ -1,7 +1,7 @@
 kind: wick/app@v1
 name: proxy
 metadata:
-  version: 0.0.1
+  version: 0.1.0
   description: HTTP Proxy for middleware
   licenses:
     - Apache-2.0

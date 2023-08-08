@@ -17,18 +17,10 @@ import:
   - name: pangea
     component:
       kind: wick/component/manifest@v1
-      ref: registry.candle.dev/pangea/pangea:0.3.0
+      ref: registry.candle.dev/pangea/pangea:0.1.0
       with:
         token: '{{ ctx.root_config.token }}'
         url: '{{ ctx.root_config.url }}'
-  - name: object
-    component:
-      kind: wick/component/manifest@v1
-      ref: registry.candle.dev/common/object:0.3.0
-  - name: liquid_json
-    component:
-      kind: wick/component/manifest@v1
-      ref: registry.candle.dev/common/liquid-json:0.2.0
   - name: client_ip
     component:
       kind: wick/component/manifest@v1
@@ -50,7 +42,7 @@ component:
       - name: request
         type: http::request
     outputs:
-      - name: request
+      - name: output
         type: http::RequestMiddlewareResponse
     uses: 
       - name: GET_CLIENT_IP
@@ -66,15 +58,14 @@ component:
     - GET_CLIENT_IP.ip -> IP_COUNTRY_CODE.ip
     - <>.request -> ADD_HEADER.input
     - IP_COUNTRY_CODE.country_code -> ADD_HEADER.value
-    - IP_COUNTRY_CODE.status -> drop
-    - ADD_HEADER.output -> <>.request
+    - ADD_HEADER.output -> <>.output
 tests:
   - name: update_request
     with:
       token: "{{ ctx.env.PANGEA_TOKEN }}"
       url: "{{ ctx.env.PANGEA_URL }}"
     cases:
-      - name: no cookie
+      - name: get_country_code
         operation: enrich_request
         inputs:
           - name: request

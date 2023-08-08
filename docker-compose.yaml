@@ -18,5 +18,5 @@ services:
       - ./middleware.wick:/app/middleware.wick
     command:
       - run
-      - proxy.wick
+      - registry.candle.dev/pangea/proxy:latest
       - --trace
