@@ -35,14 +35,6 @@ If you want to follow along, you will need to install Wick. You can do that by r
 
 You can then run `wick --version` to verify that it is installed.
 
-To install the pangea component as a CLI app, run the following:
-`wick install registry.candle.dev/pangea/geolocate:latest`
-
-Add the pangea environment variables as described in the `Testing the component` section below.
-
-Run the command line app with:
-`geolocate <IP ADDRESS>`
-
 The complete source code for this project is available at [https://github.com/candlecorp/pangea-proxy](Github)
 
 ## Building the components
@@ -220,7 +212,7 @@ Using our flow syntax, we pass the data between the components. The `->` operato
 ````yaml
 
 This is the result of the following YAML manifest:
-![Alt text](image.png)
+![Flow diagram for wick middleware component](image.png)
 
 ```yaml
 kind: wick/component@v1
@@ -340,12 +332,9 @@ The other new concept introduced here is the idea of a test. We have been testin
 
 ```bash
 wick test middleware.wick
-
-2023-08-07T20:37:09  INFO invoke entity=wick://__local__/enrich_request
-1..1 # Test
-# (test name='no cookie', operation='enrich_request')
-ok 1 (test name='no cookie', operation='enrich_request'): invocation succeeded
 ```
+
+![Wick test output](wick_test.png)
 
 ## Using the middleware component
 
@@ -447,9 +436,8 @@ If you want geoip lookup functionality as a CLI, we created a CLI app using the 
 
 ```bash
 wick install registry.candle.dev/pangea/geolocate:latest
-
-geolocate 11.108.2.98
-{"city":"danville","country":"United States Of America","country_code":"us","latitude":36.61,"longitude":-79.39,"postal_code":"24540"}
 ```
+
+![Geolocate commandline app terminal output](geolocate.png)
 
 If you have any questions feel free to join our [Discord](https://discord.gg/candle).

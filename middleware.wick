@@ -4,7 +4,7 @@ metadata:
   version: 0.0.1
   description: middleware component for pangea
   licenses:
-  - Apache-2.0
+    - Apache-2.0
 package:
   registry:
     host: registry.candle.dev
@@ -37,33 +37,27 @@ component:
     - name: url
       type: string
   operations:
-  - name: enrich_request
-    inputs: 
-      - name: request
-        type: http::request
-    outputs:
-      - name: output
-        type: http::RequestMiddlewareResponse
-    uses: 
-      - name: GET_CLIENT_IP
-        operation: client_ip::get_ip
-      - name: IP_COUNTRY_CODE
-        operation: pangea::ip_country_code
-      - name: ADD_HEADER
-        operation: http_headers::add
-        with:
-          header: x-pangea-country-code
-    flow:
-    - <>.request -> GET_CLIENT_IP.request
-    - GET_CLIENT_IP.ip -> IP_COUNTRY_CODE.ip
-    - <>.request -> ADD_HEADER.input
-    - IP_COUNTRY_CODE.country_code -> ADD_HEADER.value
-    - ADD_HEADER.output -> <>.output
+    - name: enrich_request
+      inputs:
+        - name: request
+          type: http::request
+      outputs:
+        - name: output
+          type: http::RequestMiddlewareResponse
+      uses:
+        - name: ADD_HEADER
+          operation: http_headers::add
+          with:
+            header: x-pangea-country-code
+      flow:
+        - <>.request -> client_ip::get_ip -> pangea::ip_country_code -> ADD_HEADER.value
+        - <>.request -> ADD_HEADER.input
+        - ADD_HEADER.output -> <>.output
 tests:
   - name: update_request
     with:
-      token: "{{ ctx.env.PANGEA_TOKEN }}"
-      url: "{{ ctx.env.PANGEA_URL }}"
+      token: '{{ ctx.env.PANGEA_TOKEN }}'
+      url: '{{ ctx.env.PANGEA_URL }}'
     cases:
       - name: get_country_code
         operation: enrich_request
@@ -72,38 +66,37 @@ tests:
             value:
               method: Get
               scheme: Http
-              path: "/"
-              uri: "http://localhost:8080/"
+              path: '/'
+              uri: 'http://localhost:8080/'
               version: Http11
-              authority: "localhost:8080"
-              remote_addr: "91.108.2.98"
+              authority: 'localhost:8080'
+              remote_addr: '91.108.2.98'
               query_parameters: {}
               headers:
                 host:
-                  - "localhost:8080"
+                  - 'localhost:8080'
                 user-agent:
-                  - "curl/7.64.1"
+                  - 'curl/7.64.1'
                 accept:
-                  - "*/*"
+                  - '*/*'
         outputs:
-          - name: request
+          - name: output
             value:
-              authority: "localhost:8080"
+              authority: 'localhost:8080'
               headers:
                 accept:
-                  - "*/*"
+                  - '*/*'
                 host:
-                  - "localhost:8080"
+                  - 'localhost:8080'
                 user-agent:
-                  - "curl/7.64.1"
+                  - 'curl/7.64.1'
                 x-pangea-country-code:
-                  - "ru"
+                  - 'ru'
               method: Get
-              path: "/"
-              remote_addr: "91.108.2.98"
-              scheme: "Http"
-              uri: "http://localhost:8080/"
-              version: "1.1"
-          - name: request
-            flags:
-              done: true
+              path: '/'
+              remote_addr: '91.108.2.98'
+              scheme: 'Http'
+              uri: 'http://localhost:8080/'
+              version: '1.1'
+          - name: output
+            flag: Done
